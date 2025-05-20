@@ -1,0 +1,405 @@
+---
+title: "Tarea 2. Interpolación"
+author: "NOE RAMIREZ"
+format: 
+  html:
+    grid: 
+      body-width: 1000px
+editor: visual
+jupyter: python3
+---
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+from scipy.interpolate import lagrange, CubicSpline
+from numpy.polynomial.polynomial import Polynomial
+```
+
+## Ejercicio 1
+
+### a) Polinomios de Taylor hasta grado 5, graficar
+
+```{python}
+f = lambda x: np.exp(x)*np.cos(x)
+# Derivadas en x_0=0
+d0 = f(0)
+d1 = np.exp(0)*np.cos(0) - np.exp(0)*np.sin(0)
+d2 = -2*np.exp(0)*np.sin(0)
+d3 = -2*np.exp(0)*np.cos(0)
+d4 = 2*np.exp(0)*np.sin(0)
+d5 = 2*np.exp(0)*np.cos(0)
+# Polinomio de Taylor hasta grado 5
+def taylor(x):
+    return d0 + d1*x + d2*x**2/2 + d3*x**3/6 + d4*x**4/24 + d5*x**5/120
+
+xg = np.linspace(-1, 1, 400)
+plt.figure(figsize=(8,5))
+plt.plot(xg, f(xg), label="f(x)")
+plt.plot(xg, taylor(xg), '--', label="Polinomio de Taylor grado 5")
+plt.title("f(x) y Polinomio de Taylor grado 5")
+plt.legend()
+plt.grid()
+plt.show()
+```
+
+### b) Aproximar f(0.5) con P5
+
+```{python}
+P5_05 = taylor(0.5)
+real_05 = f(0.5)
+print(f"P5(0.5)={P5_05:.8f}, f(0.5)={real_05:.8f}")
+```
+
+### c) Cota superior para el error \|f(0.5)-P5(0.5)\|
+
+```{python}
+# El error de Taylor es |f^{(6)}(zeta)/6!|*|x|^6 para algun zeta entre 0 y 0.5
+# f^{(6)}(x) = 4e^x cos(x)
+zeta = 0.5
+error_cota = abs(4*np.exp(zeta)*np.cos(zeta)) * abs(0.5)**6 / math.factorial(6)
+real_error = abs(real_05 - P5_05)
+print(f"Cota superior error: {error_cota:.8e}")
+print(f"Error real: {real_error:.8e}")
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 2
+
+```{python}
+# Puntos de ejemplo (reemplaza y0...y3 por datos reales si los tienes)
+x_nodes = np.array([0, 1, 2, 3])
+y_nodes = np.array([1, 2, 0, 5]) # CAMBIA estos valores si tienes los originales
+
+# a) Polinomios base de Lagrange
+def lagrange_base(j, x_eval, x_nodes):
+    l = np.ones_like(x_eval)
+    for m in range(len(x_nodes)):
+        if m != j:
+            l *= (x_eval - x_nodes[m])/(x_nodes[j] - x_nodes[m])
+    return l
+
+x_plot = np.linspace(-0.5, 3.5, 400)
+plt.figure(figsize=(8,5))
+for j in range(len(x_nodes)):
+    plt.plot(x_plot, lagrange_base(j, x_plot, x_nodes), label=f"L_{j}(x)")
+plt.title("Polinomios base de Lagrange")
+plt.legend()
+plt.grid()
+plt.show()
+
+# b) Polinomio de Lagrange
+lag_poly = lagrange(x_nodes, y_nodes)
+plt.figure(figsize=(8,5))
+plt.plot(x_plot, lag_poly(x_plot), label="Polinomio de Lagrange")
+plt.scatter(x_nodes, y_nodes, color='red', label="Puntos")
+plt.legend()
+plt.grid()
+plt.title("Polinomio de Lagrange de los puntos")
+plt.show()
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 3
+
+### a) f(x)=e\^{2x}, x0=0,0.25,0.5,0.75. Aproximar en 0.43
+
+```{python}
+fx = lambda x: np.exp(2*x)
+dfx = lambda x: 2*np.exp(2*x)
+x_pts = np.array([0, 0.25, 0.5, 0.75])
+y_pts = fx(x_pts)
+xq = 0.43
+
+# Lagrange
+poly_lag = lagrange(x_pts, y_pts)
+y_lag = poly_lag(xq)
+dy_lag = Polynomial(poly_lag).deriv()(xq)
+# Spline natural
+sp_nat = CubicSpline(x_pts, y_pts, bc_type='natural')
+y_nat = sp_nat(xq)
+dy_nat = sp_nat(xq,1)
+# Spline condicionado
+sp_cond = CubicSpline(x_pts, y_pts, bc_type=((1, dfx(x_pts[0])), (1, dfx(x_pts[-1]))))
+y_cond = sp_cond(xq)
+dy_cond = sp_cond(xq,1)
+
+print(f"Lagrange: f({xq})={y_lag:.7f}, f'={dy_lag:.7f}")
+print(f"Spline natural: f({xq})={y_nat:.7f}, f'={dy_nat:.7f}")
+print(f"Spline cond: f({xq})={y_cond:.7f}, f'={dy_cond:.7f}")
+print(f"Real: f({xq})={fx(xq):.7f}, f'={dfx(xq):.7f}")
+
+# Errores
+for name, y_apr, dy_apr in [
+    ('Lagrange', y_lag, dy_lag),
+    ('Spline natural', y_nat, dy_nat),
+    ('Spline cond', y_cond, dy_cond)]:
+    err = fx(xq) - y_apr
+    err_abs = abs(err)
+    err_rel = abs(err)/abs(fx(xq))
+    derr = dfx(xq) - dy_apr
+    print(f"{name}: Error real={err:.2e}, abs={err_abs:.2e}, rel={err_rel:.2e}, error derivada={derr:.2e}")
+
+# Graficas
+xg = np.linspace(0, 0.75, 400)
+plt.figure(figsize=(8,5))
+plt.plot(xg, fx(xg), label="f(x)")
+plt.plot(xg, poly_lag(xg), label="Lagrange")
+plt.plot(xg, sp_nat(xg), label="Spline natural")
+plt.plot(xg, sp_cond(xg), label="Spline cond")
+plt.scatter(x_pts, y_pts, color='red')
+plt.legend(); plt.title("Interpolación y splines para f(x)=e^{2x}")
+plt.grid(); plt.show()
+```
+
+### b) f(x)=x cos x - 3x, x=0,0.5,1,1.5. Aproximar en 0.8
+
+```{python}
+fx = lambda x: x*np.cos(x)-3*x
+dfx = lambda x: np.cos(x)-x*np.sin(x)-3
+x_pts = np.array([0,0.5,1,1.5])
+y_pts = fx(x_pts)
+xq = 0.8
+
+poly_lag = lagrange(x_pts, y_pts)
+y_lag = poly_lag(xq)
+dy_lag = Polynomial(poly_lag).deriv()(xq)
+sp_nat = CubicSpline(x_pts, y_pts, bc_type='natural')
+y_nat = sp_nat(xq)
+dy_nat = sp_nat(xq,1)
+sp_cond = CubicSpline(x_pts, y_pts, bc_type=((1, dfx(x_pts[0])), (1, dfx(x_pts[-1]))))
+y_cond = sp_cond(xq)
+dy_cond = sp_cond(xq,1)
+
+print(f"Lagrange: f({xq})={y_lag:.7f}, f'={dy_lag:.7f}")
+print(f"Spline natural: f({xq})={y_nat:.7f}, f'={dy_nat:.7f}")
+print(f"Spline cond: f({xq})={y_cond:.7f}, f'={dy_cond:.7f}")
+print(f"Real: f({xq})={fx(xq):.7f}, f'={dfx(xq):.7f}")
+
+for name, y_apr, dy_apr in [
+    ('Lagrange', y_lag, dy_lag),
+    ('Spline natural', y_nat, dy_nat),
+    ('Spline cond', y_cond, dy_cond)]:
+    err = fx(xq) - y_apr
+    err_abs = abs(err)
+    err_rel = abs(err)/abs(fx(xq))
+    derr = dfx(xq) - dy_apr
+    print(f"{name}: Error real={err:.2e}, abs={err_abs:.2e}, rel={err_rel:.2e}, error derivada={derr:.2e}")
+
+xg = np.linspace(0, 1.5, 400)
+plt.figure(figsize=(8,5))
+plt.plot(xg, fx(xg), label="f(x)")
+plt.plot(xg, poly_lag(xg), label="Lagrange")
+plt.plot(xg, sp_nat(xg), label="Spline natural")
+plt.plot(xg, sp_cond(xg), label="Spline cond")
+plt.scatter(x_pts, y_pts, color='red')
+plt.legend(); plt.title("Interpolación y splines para f(x)=x cos(x) - 3x")
+plt.grid(); plt.show()
+```
+
+### c) f(x)=log(e\^x+2), x=-2,-1,0,1,2. Aproximar en 0.5
+
+```{python}
+fx = lambda x: np.log(np.exp(x)+2)
+dfx = lambda x: np.exp(x)/(np.exp(x)+2)
+x_pts = np.array([-2,-1,0,1,2])
+y_pts = fx(x_pts)
+xq = 0.5
+
+poly_lag = lagrange(x_pts, y_pts)
+y_lag = poly_lag(xq)
+dy_lag = Polynomial(poly_lag).deriv()(xq)
+sp_nat = CubicSpline(x_pts, y_pts, bc_type='natural')
+y_nat = sp_nat(xq)
+dy_nat = sp_nat(xq,1)
+sp_cond = CubicSpline(x_pts, y_pts, bc_type=((1, dfx(x_pts[0])), (1, dfx(x_pts[-1]))))
+y_cond = sp_cond(xq)
+dy_cond = sp_cond(xq,1)
+
+print(f"Lagrange: f({xq})={y_lag:.7f}, f'={dy_lag:.7f}")
+print(f"Spline natural: f({xq})={y_nat:.7f}, f'={dy_nat:.7f}")
+print(f"Spline cond: f({xq})={y_cond:.7f}, f'={dy_cond:.7f}")
+print(f"Real: f({xq})={fx(xq):.7f}, f'={dfx(xq):.7f}")
+
+for name, y_apr, dy_apr in [
+    ('Lagrange', y_lag, dy_lag),
+    ('Spline natural', y_nat, dy_nat),
+    ('Spline cond', y_cond, dy_cond)]:
+    err = fx(xq) - y_apr
+    err_abs = abs(err)
+    err_rel = abs(err)/abs(fx(xq))
+    derr = dfx(xq) - dy_apr
+    print(f"{name}: Error real={err:.2e}, abs={err_abs:.2e}, rel={err_rel:.2e}, error derivada={derr:.2e}")
+
+xg = np.linspace(-2, 2, 400)
+plt.figure(figsize=(8,5))
+plt.plot(xg, fx(xg), label="f(x)")
+plt.plot(xg, poly_lag(xg), label="Lagrange")
+plt.plot(xg, sp_nat(xg), label="Spline natural")
+plt.plot(xg, sp_cond(xg), label="Spline cond")
+plt.scatter(x_pts, y_pts, color='red')
+plt.legend(); plt.title("Interpolación y splines para f(x)=log(e^x+2)")
+plt.grid(); plt.show()
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 4
+
+```{python}
+dias = np.array([0, 6, 10, 13, 17, 20, 28])
+muestra1 = np.array([6.67, 17.33, 42.67, 37.33, 30.10, 29.31, 28.74])
+muestra2 = np.array([6.67, 16.11, 18.89, 15.00, 10.56, 9.44, 8.89])
+
+# Lagrange
+poly1 = lagrange(dias, muestra1)
+poly2 = lagrange(dias, muestra2)
+# Splines
+sp1 = CubicSpline(dias, muestra1, bc_type='natural')
+sp2 = CubicSpline(dias, muestra2, bc_type='natural')
+
+xg = np.linspace(0, 28, 500)
+plt.figure(figsize=(9,5))
+plt.plot(xg, poly1(xg), label="Lagrange muestra 1")
+plt.plot(xg, sp1(xg), '--', label="Spline muestra 1")
+plt.scatter(dias, muestra1, color='red', label="Datos muestra 1")
+plt.title("Muestra 1")
+plt.legend(); plt.grid(); plt.show()
+
+plt.figure(figsize=(9,5))
+plt.plot(xg, poly2(xg), label="Lagrange muestra 2")
+plt.plot(xg, sp2(xg), '--', label="Spline muestra 2")
+plt.scatter(dias, muestra2, color='blue', label="Datos muestra 2")
+plt.title("Muestra 2")
+plt.legend(); plt.grid(); plt.show()
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 5
+
+```{python}
+T = np.array([50, 60, 65, 75, 80])
+rho = np.array([988, 985.7, 980.5, 974.8, 971.6])
+
+poly = lagrange(T, rho)
+sp = CubicSpline(T, rho, bc_type='natural')
+
+xg = np.linspace(50, 80, 500)
+plt.figure(figsize=(8,5))
+plt.plot(xg, poly(xg), label="Polinomio interpolante P4(x)")
+plt.plot(xg, sp(xg), label="Spline cúbico")
+plt.scatter(T, rho, color='red', label="Datos")
+plt.title("Densidad del agua: Interpolación polinomial vs Spline cúbico")
+plt.xlabel("Temperatura (°C)")
+plt.ylabel("Densidad (kg/m^3)")
+plt.legend(); plt.grid(); plt.show()
+
+Tq = 63
+print("Aproximación para T=63°C:")
+print(f"P4(63)={poly(Tq):.5f}, Spline(63)={sp(Tq):.5f}")
+print(f"Derivada Spline={sp(Tq,1):.5f}")
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 6
+
+```{python}
+x = np.arange(0,11)
+y = np.random.choice(np.arange(-25,26), size=len(x), replace=True)
+sp = CubicSpline(x, y, bc_type='natural')
+
+xg = np.linspace(0,10,400)
+plt.figure(figsize=(8,5))
+plt.plot(x, y, 'o', label="Datos")
+plt.plot(xg, sp(xg), label="Spline cúbico")
+plt.title("Spline cúbico para puntos aleatorios")
+plt.legend(); plt.grid(); plt.show()
+```
+
+------------------------------------------------------------------------
+
+## Ejercicio 7
+
+```{python}
+# a) f(x) = e^{2x} cos 3x, [0,2]
+f = lambda x: np.exp(2*x)*np.cos(3*x)
+df = lambda x: 2*np.exp(2*x)*np.cos(3*x)-3*np.exp(2*x)*np.sin(3*x)
+for n in [4,5,10,20]:
+    x_nodes = np.linspace(0,2,n)
+    y_nodes = f(x_nodes)
+    sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+    xg = np.linspace(0,2,500)
+    plt.plot(xg, sp(xg), label=f"Spline n={n}")
+plt.plot(xg, f(xg), 'k--', label="f(x)")
+plt.legend(); plt.title("Splines condicionados para f(x)=e^{2x} cos 3x")
+plt.grid(); plt.show()
+# Diferencia máxima para n=20
+x_nodes = np.linspace(0,2,20)
+y_nodes = f(x_nodes)
+sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+xg = np.linspace(0,2,500)
+diff = np.abs(f(xg)-sp(xg))
+print(f"Máxima diferencia spline n=20: {np.max(diff):.4e}")
+
+# b) f(x) = sin(log x), [1,10]
+f = lambda x: np.sin(np.log(x))
+df = lambda x: np.cos(np.log(x))/x
+for n in [4,5,10,20]:
+    x_nodes = np.linspace(1,10,n)
+    y_nodes = f(x_nodes)
+    sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+    xg = np.linspace(1,10,500)
+    plt.plot(xg, sp(xg), label=f"Spline n={n}")
+plt.plot(xg, f(xg), 'k--', label="f(x)")
+plt.legend(); plt.title("Splines condicionados para f(x)=sin(log x)")
+plt.grid(); plt.show()
+x_nodes = np.linspace(1,10,20)
+y_nodes = f(x_nodes)
+sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+xg = np.linspace(1,10,500)
+diff = np.abs(f(xg)-sp(xg))
+print(f"Máxima diferencia spline n=20: {np.max(diff):.4e}")
+
+# c) f(x) = e^x + e^{-x}, [0,3]
+f = lambda x: np.exp(x)+np.exp(-x)
+df = lambda x: np.exp(x)-np.exp(-x)
+for n in [4,5,10,20]:
+    x_nodes = np.linspace(0,3,n)
+    y_nodes = f(x_nodes)
+    sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+    xg = np.linspace(0,3,500)
+    plt.plot(xg, sp(xg), label=f"Spline n={n}")
+plt.plot(xg, f(xg), 'k--', label="f(x)")
+plt.legend(); plt.title("Splines condicionados para f(x)=e^x+e^{-x}")
+plt.grid(); plt.show()
+x_nodes = np.linspace(0,3,20)
+y_nodes = f(x_nodes)
+sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+xg = np.linspace(0,3,500)
+diff = np.abs(f(xg)-sp(xg))
+print(f"Máxima diferencia spline n=20: {np.max(diff):.4e}")
+
+# d) f(x) = cos x + sin x, [0,2pi]
+f = lambda x: np.cos(x)+np.sin(x)
+df = lambda x: -np.sin(x)+np.cos(x)
+for n in [4,5,10,20]:
+    x_nodes = np.linspace(0,2*np.pi,n)
+    y_nodes = f(x_nodes)
+    sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+    xg = np.linspace(0,2*np.pi,500)
+    plt.plot(xg, sp(xg), label=f"Spline n={n}")
+plt.plot(xg, f(xg), 'k--', label="f(x)")
+plt.legend(); plt.title("Splines condicionados para f(x)=cosx+sinx")
+plt.grid(); plt.show()
+x_nodes = np.linspace(0,2*np.pi,20)
+y_nodes = f(x_nodes)
+sp = CubicSpline(x_nodes, y_nodes, bc_type=((1,df(x_nodes[0])), (1,df(x_nodes[-1]))))
+xg = np.linspace(0,2*np.pi,500)
+diff = np.abs(f(xg)-sp(xg))
+print(f"Máxima diferencia spline n=20: {np.max(diff):.4e}")
+```

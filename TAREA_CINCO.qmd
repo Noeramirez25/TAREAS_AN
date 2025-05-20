@@ -1,0 +1,494 @@
+---
+title: "Tarea 5. Diferenciación e integración numérica."
+author: "NOE RAMIREZ"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+# Paquetes necesarios
+
+```{r}
+if(!require("numDeriv")) install.packages("numDeriv")
+if(!require("pracma")) install.packages("pracma")
+if(!require("cubature")) install.packages("cubature")
+if(!require("plotly")) install.packages("plotly")
+if(!require("ggplot2")) install.packages("ggplot2")
+if(!require("RColorBrewer")) install.packages("RColorBrewer")
+if(!require("Deriv")) install.packages("Deriv")
+```
+
+```{r}
+library(numDeriv)
+library(pracma)
+library(cubature)
+library(plotly)
+library(ggplot2)
+library(RColorBrewer)
+library(Deriv)
+```
+
+# Ejercicio 1
+
+## a) $f(x)=e^{2x}-\cos(2x)$, $x\in [0,2]$
+
+```{r}
+f <- function(x) exp(2*x) - cos(2*x)
+f_prime <- function(x) 2*exp(2*x) + 2*sin(2*x)
+f_double_prime <- function(x) 4*exp(2*x) + 4*cos(2*x)
+x <- seq(0, 2, length.out = 200)
+y <- f(x)
+
+plot(x, y, type="l", col="blue", main="f(x) = e^{2x} - cos(2x)", ylab="f(x)")
+```
+
+### Derivada aproximada y exacta
+
+```{r}
+h1 <- 0.1
+h2 <- 0.05
+d1 <- grad(f, x, method.args=list(eps=h1))
+d2 <- grad(f, x, method.args=list(eps=h2))
+d_exact <- f_prime(x)
+
+plot(x, d1, type="l", col="red", ylim=range(c(d1, d2, d_exact)), ylab="Derivada", main="Derivada aproximada y exacta")
+lines(x, d2, col="green")
+lines(x, d_exact, col="blue")
+legend("topleft", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la derivada
+
+```{r}
+plot(x, abs(d1-d_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la derivada")
+lines(x, abs(d2-d_exact), col="green")
+legend("topleft", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+### Segunda derivada
+
+```{r}
+d2_num1 <- hessian(f, x, method.args=list(eps=h1))
+d2_num2 <- hessian(f, x, method.args=list(eps=h2))
+d2_exact <- f_double_prime(x)
+
+plot(x, diag(d2_num1), type="l", col="red", ylim=range(c(diag(d2_num1), diag(d2_num2), d2_exact)), ylab="Segunda derivada", main="Segunda derivada aproximada y exacta")
+lines(x, diag(d2_num2), col="green")
+lines(x, d2_exact, col="blue")
+legend("topleft", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la segunda derivada
+
+```{r}
+plot(x, abs(diag(d2_num1)-d2_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la segunda derivada")
+lines(x, abs(diag(d2_num2)-d2_exact), col="green")
+legend("topleft", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+------------------------------------------------------------------------
+
+## b) $f(x)=\log(x+2)-(x+1)^2$, $x\in [0,5]$
+
+```{r}
+f <- function(x) log(x+2)-(x+1)^2
+f_prime <- function(x) 1/(x+2) - 2*(x+1)
+f_double_prime <- function(x) -1/(x+2)^2 - 2
+x <- seq(0, 5, length.out = 200)
+y <- f(x)
+
+plot(x, y, type="l", col="blue", main="f(x) = log(x+2)-(x+1)^2", ylab="f(x)")
+```
+
+### Derivada aproximada y exacta
+
+```{r}
+d1 <- grad(f, x, method.args=list(eps=h1))
+d2 <- grad(f, x, method.args=list(eps=h2))
+d_exact <- f_prime(x)
+
+plot(x, d1, type="l", col="red", ylim=range(c(d1, d2, d_exact)), ylab="Derivada", main="Derivada aproximada y exacta")
+lines(x, d2, col="green")
+lines(x, d_exact, col="blue")
+legend("topright", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la derivada
+
+```{r}
+plot(x, abs(d1-d_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la derivada")
+lines(x, abs(d2-d_exact), col="green")
+legend("topright", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+### Segunda derivada
+
+```{r}
+d2_num1 <- hessian(f, x, method.args=list(eps=h1))
+d2_num2 <- hessian(f, x, method.args=list(eps=h2))
+d2_exact <- f_double_prime(x)
+
+plot(x, diag(d2_num1), type="l", col="red", ylim=range(c(diag(d2_num1), diag(d2_num2), d2_exact)), ylab="Segunda derivada", main="Segunda derivada aproximada y exacta")
+lines(x, diag(d2_num2), col="green")
+lines(x, d2_exact, col="blue")
+legend("topright", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la segunda derivada
+
+```{r}
+plot(x, abs(diag(d2_num1)-d2_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la segunda derivada")
+lines(x, abs(diag(d2_num2)-d2_exact), col="green")
+legend("topright", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+------------------------------------------------------------------------
+
+## c) $f(x)=\sqrt{x} \sin(x^2)$, $x\in [0,\pi]$
+
+```{r}
+f <- function(x) sqrt(x)*sin(x^2)
+f_prime <- function(x) 2*x*sqrt(x)*cos(x^2) + sin(x^2)/(2*sqrt(x))
+f_double_prime <- function(x) 4*sqrt(x)*cos(x^2) - sin(x^2)*(4*x^2*sqrt(x)+(1/(4*x*sqrt(x))))
+x <- seq(0.001, pi, length.out = 200) # Evita x=0 para la derivada
+y <- f(x)
+
+plot(x, y, type="l", col="blue", main="f(x) = sqrt(x) * sin(x^2)", ylab="f(x)")
+```
+
+### Derivada aproximada y exacta
+
+```{r}
+d1 <- grad(f, x, method.args=list(eps=h1))
+d2 <- grad(f, x, method.args=list(eps=h2))
+d_exact <- f_prime(x)
+
+plot(x, d1, type="l", col="red", ylim=range(c(d1, d2, d_exact)), ylab="Derivada", main="Derivada aproximada y exacta")
+lines(x, d2, col="green")
+lines(x, d_exact, col="blue")
+legend("topleft", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la derivada
+
+```{r}
+plot(x, abs(d1-d_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la derivada")
+lines(x, abs(d2-d_exact), col="green")
+legend("topleft", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+### Segunda derivada
+
+```{r}
+d2_num1 <- hessian(f, x, method.args=list(eps=h1))
+d2_num2 <- hessian(f, x, method.args=list(eps=h2))
+d2_exact <- f_double_prime(x)
+
+plot(x, diag(d2_num1), type="l", col="red", ylim=range(c(diag(d2_num1), diag(d2_num2), d2_exact)), ylab="Segunda derivada", main="Segunda derivada aproximada y exacta")
+lines(x, diag(d2_num2), col="green")
+lines(x, d2_exact, col="blue")
+legend("topleft", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la segunda derivada
+
+```{r}
+plot(x, abs(diag(d2_num1)-d2_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la segunda derivada")
+lines(x, abs(diag(d2_num2)-d2_exact), col="green")
+legend("topleft", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+------------------------------------------------------------------------
+
+## d) $f(x) = (\cos 3x)^2 - e^{2x}$, $x\in [0, \pi/2]$
+
+```{r}
+f <- function(x) (cos(3*x))^2 - exp(2*x)
+f_prime <- function(x) -6*cos(3*x)*sin(3*x) - 2*exp(2*x)
+f_double_prime <- function(x) -18*cos(6*x) - 4*exp(2*x)
+x <- seq(0, pi/2, length.out = 200)
+y <- f(x)
+
+plot(x, y, type="l", col="blue", main="f(x) = (cos 3x)^2 - e^{2x}", ylab="f(x)")
+```
+
+### Derivada aproximada y exacta
+
+```{r}
+d1 <- grad(f, x, method.args=list(eps=h1))
+d2 <- grad(f, x, method.args=list(eps=h2))
+d_exact <- f_prime(x)
+
+plot(x, d1, type="l", col="red", ylim=range(c(d1, d2, d_exact)), ylab="Derivada", main="Derivada aproximada y exacta")
+lines(x, d2, col="green")
+lines(x, d_exact, col="blue")
+legend("topleft", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la derivada
+
+```{r}
+plot(x, abs(d1-d_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la derivada")
+lines(x, abs(d2-d_exact), col="green")
+legend("topleft", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+### Segunda derivada
+
+```{r}
+d2_num1 <- hessian(f, x, method.args=list(eps=h1))
+d2_num2 <- hessian(f, x, method.args=list(eps=h2))
+d2_exact <- f_double_prime(x)
+
+plot(x, diag(d2_num1), type="l", col="red", ylim=range(c(diag(d2_num1), diag(d2_num2), d2_exact)), ylab="Segunda derivada", main="Segunda derivada aproximada y exacta")
+lines(x, diag(d2_num2), col="green")
+lines(x, d2_exact, col="blue")
+legend("topleft", legend=c("h=0.1", "h=0.05", "Exacta"), col=c("red", "green", "blue"), lty=1)
+```
+
+### Error absoluto de la segunda derivada
+
+```{r}
+plot(x, abs(diag(d2_num1)-d2_exact), type="l", col="red", ylab="Error absoluto", main="Error absoluto de la segunda derivada")
+lines(x, abs(diag(d2_num2)-d2_exact), col="green")
+legend("topleft", legend=c("h=0.1", "h=0.05"), col=c("red", "green"), lty=1)
+```
+
+------------------------------------------------------------------------
+
+# Ejercicio 2
+
+## a) $\int_0^1 e^{-x^2} dx$
+
+```{r}
+f <- function(x) exp(-x^2)
+integral_1 <- integrate(f, 0, 1)
+integral_1$value
+```
+
+### Método de Montecarlo
+
+```{r}
+set.seed(123)
+N <- 1e5
+x_mc <- runif(N, 0, 1)
+y_mc <- runif(N, 0, 1)
+puntos_in <- y_mc <= f(x_mc)
+area_mc <- mean(puntos_in)
+area_mc
+```
+
+------------------------------------------------------------------------
+
+## b) $\int_0^\pi \sin(x^2) dx$
+
+```{r}
+f <- function(x) sin(x^2)
+integral_2 <- integrate(f, 0, pi)
+integral_2$value
+```
+
+### Método de Montecarlo
+
+```{r}
+set.seed(123)
+N <- 1e5
+x_mc <- runif(N, 0, pi)
+y_mc <- runif(N, -1, 1)
+puntos_in <- abs(y_mc) <= abs(f(x_mc)) & sign(y_mc)==sign(f(x_mc))
+area_mc <- pi * mean(puntos_in)
+area_mc
+```
+
+------------------------------------------------------------------------
+
+## c) $\int_0^\pi \frac{\sin x}{x} dx$
+
+```{r}
+f <- function(x) ifelse(x==0,1,sin(x)/x)
+integral_3 <- integrate(f, 0, pi)
+integral_3$value
+```
+
+### Método de Montecarlo
+
+```{r}
+set.seed(123)
+N <- 1e5
+x_mc <- runif(N, 0, pi)
+y_mc <- runif(N, 0, 1)
+puntos_in <- y_mc <= f(x_mc)
+area_mc <- pi * mean(puntos_in)
+area_mc
+```
+
+------------------------------------------------------------------------
+
+## d) $\int_0^\infty e^{-x^2} \cos(x) dx$
+
+```{r}
+f <- function(x) exp(-x^2) * cos(x)
+integral_4 <- integrate(f, 0, Inf)
+integral_4$value
+```
+
+------------------------------------------------------------------------
+
+## e) $\int_0^1 x^x dx$
+
+```{r}
+f <- function(x) x^x
+integral_5 <- integrate(f, 0, 1)
+integral_5$value
+```
+
+------------------------------------------------------------------------
+
+## f) $\int_1^5 e^{-x^2} x^3 dx$
+
+```{r}
+f <- function(x) exp(-x^2)*x^3
+integral_6 <- integrate(f, 1, 5)
+integral_6$value
+```
+
+------------------------------------------------------------------------
+
+## g) $\int_0^1 \sqrt{1-x^2} dx$
+
+```{r}
+f <- function(x) sqrt(1-x^2)
+integral_7 <- integrate(f, 0, 1)
+integral_7$value
+```
+
+### Método de Montecarlo
+
+```{r}
+set.seed(123)
+N <- 1e5
+x_mc <- runif(N, 0, 1)
+y_mc <- runif(N, 0, 1)
+puntos_in <- y_mc <= f(x_mc)
+area_mc <- mean(puntos_in)
+area_mc
+```
+
+------------------------------------------------------------------------
+
+## h) $\int_0^\infty \frac{x}{e^x-1} dx$
+
+```{r}
+f <- function(x) x/(exp(x)-1)
+integral_8 <- integrate(f, 0, Inf)
+integral_8$value
+```
+
+------------------------------------------------------------------------
+
+## i) $\int_0^1 \frac{1}{\sqrt{x^4+1}} dx$
+
+```{r}
+f <- function(x) 1/sqrt(x^4+1)
+integral_9 <- integrate(f, 0, 1)
+integral_9$value
+```
+
+------------------------------------------------------------------------
+
+# Ejercicio 3
+
+## a) $\int_{-1}^{1}\int_1^2 (3y^2-x^2+5) dx dy$
+
+```{r}
+f <- function(x, y) 3*y^2 - x^2 + 5
+integral_a <- integrate(function(y) integrate(function(x) f(x, y), 1, 2)$value, -1, 1)
+integral_a$value
+```
+
+------------------------------------------------------------------------
+
+## b) $\int_{0}^{6}\int_1^5 \sqrt{x+4y} dx dy$
+
+```{r}
+f <- function(x, y) sqrt(x+4*y)
+integral_b <- integrate(function(y) integrate(function(x) f(x, y), 1, 5)$value, 0, 6)
+integral_b$value
+```
+
+------------------------------------------------------------------------
+
+## c) $\int_{1}^{e}\int_0^{log(x)} x^3 dx dy$
+
+```{r}
+f <- function(x, y) x^3
+integral_c <- integrate(function(y) integrate(function(x) f(x, y), 0, log(y))$value, 1, exp(1))
+integral_c$value
+```
+
+------------------------------------------------------------------------
+
+## d) $\iint_D 30ye^x dx dy$, donde $D: x\in[0,4], y\in[x/4, x]$
+
+```{r}
+f <- function(x, y) 30*y*exp(x)
+integral_d <- integrate(function(x) integrate(function(y) f(x, y), x/4, x)$value, 0, 4)
+integral_d$value
+
+# Valor exacto
+integral_exacta <- 225/8*(5*exp(4)-1)
+error_absoluto <- abs(integral_exacta - integral_d$value)
+error_absoluto
+```
+
+------------------------------------------------------------------------
+
+## e) $\iiint_B z e^{x+y} dx dy dz$, $B=[0,1]\times[0,1]\times[0,1]$
+
+```{r}
+f <- function(x, y, z) z*exp(x+y)
+integral_e <- adaptIntegrate(f, lowerLimit=rep(0,3), upperLimit=rep(1,3))
+integral_e$integral
+```
+
+------------------------------------------------------------------------
+
+## f) $\int_0^1 \int_0^x \int_0^y (y+xz) dz\, dy\, dx$
+
+```{r}
+f <- function(x, y, z) y + x*z
+integral_f <- adaptIntegrate(f, lowerLimit=c(0,0,0), upperLimit=c(1,1,1), 
+                            fDim=1, 
+                            regionFun=function(x) x[2]<=x[1] & x[3]<=x[2])
+integral_f$integral
+```
+
+------------------------------------------------------------------------
+
+# Ejercicio 4
+
+## Ejemplo: Distribución Gamma
+
+```{r}
+a <- 1.9
+x <- seq(0, qgamma(0.99, shape=a), length.out=500)
+plot(x, dgamma(x, shape=a), type="l", lwd=2, main="Función de densidad gamma", ylab="f(x)")
+```
+
+Probabilidad en el intervalo \[1, 3\]:
+
+```{r}
+p_intervalo <- integrate(function(x) dgamma(x, shape=a), 1, 3)$value
+p_intervalo
+```
+
+Comparación con la función de distribución acumulada (CDF):
+
+```{r}
+cdf_diff <- pgamma(3, shape=a) - pgamma(1, shape=a)
+cdf_diff
+```
+
+------------------------------------------------------------------------
