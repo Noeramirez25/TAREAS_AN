@@ -1,0 +1,880 @@
+---
+title: "Tarea 6. Ecuaciones diferenciales ordinarias."
+author: "Noé Ramírez Lona"
+format: 
+  html:
+    grid: 
+      body-width: 1000px
+editor: visual
+jupyter: python3
+---
+
+```{python}
+#| code-fold: true
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import integrate
+```
+
+# Ejercicio 1
+
+```{python}
+#| code-fold: true
+#| fig-align: 'center'
+
+f = lambda t, y: (-1/26)*(y-18)
+t0 = 0
+tf = 200
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], [95], t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="Temperatura")
+plt.xlabel("Tiempo (min)")
+plt.ylabel("Temperatura (°C)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 2
+
+```{python}
+#| code-fold: true
+
+f = lambda t, y: t - t*y
+t0 = 1
+tf = 5
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], [0], t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.xlabel("t")
+plt.ylabel("y")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 3
+
+```{python}
+#| code-fold: true
+
+def f(t, U):
+    u, v = U
+    return [v, 8*np.sin(3*t) - 3*v - 1.5*u]
+
+t0 = 1
+tf = 2
+s0 = np.array([-0.5, 1])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="u(t)")
+plt.plot(t_values, edo_sol.y[1], label="v(t)")
+plt.xlabel("t")
+plt.ylabel("Valor")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 4
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z = Y
+    return [z, -4*y]
+
+t0 = 0
+tf = 10
+s0 = np.array([1, 0])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 5
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z = Y
+    return [z, -0.5*z - 4*y]
+
+t0 = 0
+tf = 20
+s0 = np.array([2, 0])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 6
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z = Y
+    return [z, np.cos(t) - 2*z - y]
+
+t0 = 0
+tf = 20
+s0 = np.array([0, 1])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 7
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z = Y
+    return [z, -y**3 + np.cos(t)]
+
+t0 = 0
+tf = 10
+s0 = np.array([0, 0])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 8
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z = Y
+    return [z, -z**2 - y]
+
+t0 = 0
+tf = 5
+s0 = np.array([1, -1])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 9
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    theta, w = Y
+    return [w, -np.sin(theta)]
+
+t0 = 0
+tf = 20
+s0 = np.array([np.pi/4, 0])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="θ(t)")
+plt.plot(t_values, edo_sol.y[1], label="θ'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 10
+
+```{python}
+#| code-fold: true
+
+def f(t, Q, L, R, C):
+    q, i = Q
+    return [i, (1/L)*(np.sin(t) - R*i - q/C)]
+
+t0 = 0
+tf = 50
+s0 = np.array([0, 0])
+t_values = np.linspace(t0, tf, 10000)
+
+L = 0.5
+R = 2
+C = 5
+
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values, args=(L, R, C))
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="Q(t)")
+plt.plot(t_values, edo_sol.y[1], label="I(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+Trayectoria
+
+```{python}
+#| code-fold: true
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("Q(t)")
+plt.ylabel("I(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 11
+
+```{python}
+#| code-fold: true
+
+def f(x, Y):
+    y, z = Y
+    return [z, -(1/x)*z - (x**2 - 1)/x**2*y]
+
+x0 = 1
+xf = 10
+s0 = np.array([0.5, -0.1])
+x_values = np.linspace(x0, xf, 1000)
+edo_sol = integrate.solve_ivp(f, [x0, xf], s0, t_eval=x_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(x_values, edo_sol.y[0], label="y(x)")
+plt.plot(x_values, edo_sol.y[1], label="y'(x)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 12
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z = Y
+    return [z, -y * np.exp(y) + np.sin(t)]
+
+t0 = 0
+tf = 10
+s0 = np.array([0, 1])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 13
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z = Y
+    return [z, -np.pi**2 * y + np.cos(2*np.pi*t)]
+
+t0 = 0
+tf = 2
+s0 = np.array([1, 0])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 14
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z, w = Y
+    return [z, w, 3*w - 3*z + y]
+
+t0 = 0
+tf = 5
+s0 = np.array([1, 0, 1])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.plot(t_values, edo_sol.y[2], label="y''(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 15
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z, w = Y
+    return [z, w, -y**2]
+
+t0 = 0
+tf = 5
+s0 = np.array([1, 0, 0])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.plot(t_values, edo_sol.y[2], label="y''(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 16
+
+```{python}
+#| code-fold: true
+
+def f(t, U):
+    u1, u2, u3 = U
+    return [u2, u3, np.cos(t) - u3 - u1**3]
+
+t0 = 0
+tf = 5
+s0 = np.array([0, 1, 0])
+t_values = np.linspace(t0, tf, 1000)
+
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.plot(t_values, edo_sol.y[2], label="y''(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 17
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z, w = Y
+    return [z, w, 6*y*z]
+
+t0 = 0
+tf = 2
+s0 = np.array([2, 0, -1])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.plot(t_values, edo_sol.y[2], label="y''(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 18
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y, z, w = Y
+    return [z, w, -y*w + z]
+
+t0 = 0
+tf = 2
+s0 = np.array([1, 0, -1])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y(t)")
+plt.plot(t_values, edo_sol.y[1], label="y'(t)")
+plt.plot(t_values, edo_sol.y[2], label="y''(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 19
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    b, s = X
+    return [0.05*b + s, 0.04*s]
+
+t0 = 0
+tf = 5
+s0 = np.array([2000, 500])
+t_values = np.linspace(t0, tf, 1000)
+
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="b(t)")
+plt.plot(t_values, edo_sol.y[1], label="s(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 20
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [-6*x - 3*y, -15*x + 6*y]
+
+t0 = 0
+tf = 2
+s0 = np.array([3, 2])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 21
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [1.4*x - y, -1.25*x + 3.4*y]
+
+t0 = 0
+tf = 5
+s0 = np.array([7, 3])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 22
+
+```{python}
+#| code-fold: true
+
+def f(t, Y):
+    y1, y2 = Y
+    return [-6.2 + 1.1*y1 - 0.8*y2, -13.8 + 2.1*y1 - 1.2*y2]
+
+t0 = 0
+tf = 5
+s0 = np.array([11, 4])
+t_values = np.linspace(t0, tf, 1000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="y1(t)")
+plt.plot(t_values, edo_sol.y[1], label="y2(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("y1(t)")
+plt.ylabel("y2(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 23
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [x*(1 - x) - x*y, -y + x*y]
+
+t0 = 0
+tf = 100
+s0 = np.array([0.9, 0.1])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 24
+
+```{python}
+#| code-fold: true
+
+def f(t, X, mu):
+    x, y = X
+    return [y, mu*(1-x**2)*y - x]
+
+mu = 3
+t0 = 0
+tf = 30
+s0 = np.array([2, 0])
+t_values = np.linspace(t0, tf, 5000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values, args=(mu,))
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+# Órbita para diferentes valores de mu
+val_mu = np.linspace(1, 10, 5)
+plt.figure(figsize=(8,6))
+for mu in val_mu:
+    edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values, args=(mu,))
+    plt.plot(edo_sol.y[0], edo_sol.y[1], label=f"mu={mu:.1f}")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 25
+
+```{python}
+#| code-fold: true
+
+def f(t, X, alpha, beta, delta, gamma):
+    x, y = X
+    return [alpha*x - beta*x*y, delta*x*y - gamma*y]
+
+alpha = 1.5
+beta = 1
+delta = 1
+gamma = 3
+
+t0 = 0
+tf = 15
+s0 = np.array([10, 5])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values, args=(alpha, beta, delta, gamma))
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 26
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [np.sin(y) - x**3, np.cos(x) - y**2]
+
+t0 = 0
+tf = 10
+s0 = np.array([1, 0])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 27
+
+```{python}
+#| code-fold: true
+
+def f(t, X, I):
+    v, w = X
+    return [v - v**3/3 - w + I, 0.08*(v + 0.7 - 0.8*w)]
+
+I = 0.5
+t0 = 0
+tf = 30
+s0 = np.array([-1, 1])
+t_values = np.linspace(t0, tf, 4000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values, args=(I,))
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="v(t)")
+plt.plot(t_values, edo_sol.y[1], label="w(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("v(t)")
+plt.ylabel("w(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 28
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [x*np.sin(t) + y**2, -y*np.cos(t) + x]
+
+t0 = 0
+tf = 10
+s0 = np.array([1, -1])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 29
+
+```{python}
+#| code-fold: true
+
+def f(t, X, beta, gamma):
+    S, I, R = X
+    return [-beta*S*I, beta*S*I - gamma*I, gamma*I]
+
+beta = 0.5
+gamma = 0.1
+
+t0 = 0
+tf = 100
+s0 = np.array([0.99, 0.01, 0])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values, args=(beta, gamma))
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="S(t)")
+plt.plot(t_values, edo_sol.y[1], label="I(t)")
+plt.plot(t_values, edo_sol.y[2], label="R(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 30
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [x*(1 - x - 0.5*y), y*(1 - y - 0.3*x)]
+
+t0 = 0
+tf = 40
+s0 = np.array([0.5, 0.2])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 31
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [y, -np.sin(x) - 0.5*y]
+
+t0 = 0
+tf = 20
+s0 = np.array([np.pi/2, 0])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
+
+# Ejercicio 32
+
+```{python}
+#| code-fold: true
+
+def f(t, X):
+    x, y = X
+    return [x*(1 - x) - x*y**2, y*(1 - y) - x**2*y]
+
+t0 = 0
+tf = 20
+s0 = np.array([0.8, 0.6])
+t_values = np.linspace(t0, tf, 2000)
+edo_sol = integrate.solve_ivp(f, [t0, tf], s0, t_eval=t_values)
+
+plt.figure(figsize=(8,6))
+plt.plot(t_values, edo_sol.y[0], label="x(t)")
+plt.plot(t_values, edo_sol.y[1], label="y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+
+plt.figure(figsize=(8,6))
+plt.plot(edo_sol.y[0], edo_sol.y[1], label="Trayectoria")
+plt.xlabel("x(t)")
+plt.ylabel("y(t)")
+plt.grid()
+plt.legend()
+plt.show()
+```
